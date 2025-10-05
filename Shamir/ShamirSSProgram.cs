@@ -66,18 +66,17 @@ public static class ShamirSSProgram
 
 public class ShamirUser
 {
-    private static readonly Random Random = new();
-    
-    public long P { get; }
+    private readonly Random _random = new();
+    private readonly long _p;
     private long _c { get; }
     private long _d { get; }    
     
     public ShamirUser(long p)
     {
-        P = p;
+        _p = p;
         do
         {
-            _c = Random.NextInt64(2, p - 1);
+            _c = _random.NextInt64(2, p - 1);
         } while (MyAlgorithms.Gcd(_c, p - 1) != 1);
         
         _d = MyAlgorithms.ModInverse(_c, p - 1);
@@ -91,7 +90,7 @@ public class ShamirUser
 
     public ShamirUser(long p, long c)
     {
-        P = p;
+        _p = p;
         _c = c;
         if(MyAlgorithms.Gcd(_c, p - 1) != 1)
             throw new InvalidOperationException($"Invalid C key");
@@ -106,8 +105,8 @@ public class ShamirUser
     }
     
     public long EncryptBlock(long block) =>
-        MyAlgorithms.ModPow(block, _c, P);
+        MyAlgorithms.ModPow(block, _c, _p);
     
     public long DecryptBlock(long block) =>
-        MyAlgorithms.ModPow(block, _d, P);
+        MyAlgorithms.ModPow(block, _d, _p);
 }
