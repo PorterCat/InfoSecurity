@@ -46,8 +46,8 @@ public static class ShamirSSProgram
 
     private static void SimpleExample()
     {
-        long p = 23; // Чтобы шифровать весь диапазон Char, P >= 257!!! 
-        var alice = new ShamirUser(p, 15);
+        long p = 19; // Чтобы шифровать весь диапазон Char, P >= 257!!! 
+        var alice = new ShamirUser(p, 5);
         var bob = new ShamirUser(p, 7);
 
         string origMessage = "Hello!";
@@ -98,7 +98,7 @@ public class ShamirUser
         _d = MyAlgorithms.ModInverse(_c, p - 1);
         
         var cond = (_c * _d) % (p - 1) == 1;
-        Console.WriteLine($"cA[{_c}] * dA[{_d}] (mod {p - 1}) == 1? ({cond})");
+        Console.WriteLine($"C[{_c}] * D[{_d}] (mod {p - 1}) == 1? ({cond})");
         
         if (!cond)
             throw new InvalidOperationException($"Invalid key");

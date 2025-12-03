@@ -1,5 +1,6 @@
 using System.Net.Sockets;
 using System.Numerics;
+using Open.Numeric.Primes.Extensions;
 
 namespace InfoSecurity;
 
@@ -73,25 +74,24 @@ public static class MyAlgorithms
         throw new Exception("i and j not found");
     }
     
-    public static long ModPow(long a, long? x, long p)
+    public static long ModPow(long a, long x, long p)
     {
-        // long v = a % p;
-        //
-        // long result = 1;
-        // while (x > 0)
-        // {
-        //     if ((x & 1) == 1)
-        //         result = (result * v) % p;
-        //     v = (v * v) % p;
-        //     x >>= 1;
-        // }
-        //
-        // return result;
-        if (!x.HasValue) return 0;
-        return ModPow(a, x.Value, p);
+        long result = 1;
+        a %= p;
+    
+        while (x > 0)
+        {
+            if ((x & 1) == 1)
+                result = (result * a) % p;
+        
+            a = (a * a) % p;
+            x >>= 1;
+        }
+    
+        return result;
     }
     
-    public static long ModPow(long a, long x, long p)
+    public static long SafeModPow(long a, long x, long p)
     {
         BigInteger bigA = a;
         BigInteger bigX = x;
@@ -99,62 +99,26 @@ public static class MyAlgorithms
         BigInteger result = BigInteger.ModPow(bigA, bigX, bigP);
         return (long)result;
     }
-    
-    private static long MultiplyMod(long a, long b, long mod)
-    {
-        return (long)((BigInteger)a * b % mod);
-    }
+
+    public static long MultiplyMod(long a, long b, long mod) =>
+         (long)(((ulong)a * (ulong)b) % (ulong)mod);
     
     public static long FindPrimitiveRoot(long p)
     {
-        if (!p.IsPrime())
-            throw new ArgumentException("p must be prime");
+        long q = ((p - 1) / 2);
+        if (!(p.IsPrime() && q.IsPrime()))
+            return -1;
+
+        if (p == 2) return 1;
+        if (p == 3) return 2;
         
-        var factors = GetPrimeFactors(p - 1);
-        
-        for (long g = 2; g < p - 1; g++)
+        for (long g = 2; g < p; g++)
         {
-            bool isPrimitiveRoot = true;
-            
-            foreach (var factor in factors)
-            {
-                if (MyAlgorithms.ModPow(g, (p - 1) / factor, p) == 1)
-                {
-                    isPrimitiveRoot = false;
-                    break;
-                }
-            }
-            
-            if (isPrimitiveRoot)
+            if (ModPow(g, q, p) != 1)
                 return g;
         }
         
-        throw new Exception($"Primitive root not found for prime {p}");
-    }
-    
-    private static List<long> GetPrimeFactors(long n)
-    {
-        var factors = new List<long>();
-        
-        while (n % 2 == 0)
-        {
-            factors.Add(2);
-            n /= 2;
-        }
-        
-        for (long i = 3; i * i <= n; i += 2)
-        {
-            while (n % i == 0)
-            {
-                factors.Add(i);
-                n /= i;
-            }
-        }
-        
-        if (n > 1)
-            factors.Add(n);
-        
-        return factors.Distinct().ToList();
+        return -1;
     }
     
     public static long Gcd(long a, long b)
@@ -173,8 +137,8 @@ public static class MyAlgorithms
     public static (long gcd, long a, long b) ExtGcd(long a, long b)
     {
         long oldR = a, r = b;
-        long oldS = 1, s = 0; // коэффициенты при a
-        long oldT = 0, t = 1; // коэффициенты при b
+        long oldS = 1, s = 0;
+        long oldT = 0, t = 1;
 
         while (r != 0)
         {
@@ -196,12 +160,10 @@ public static class MyAlgorithms
     public static long ModInverse(long c, long p)
     {
         var (gcd, aCoeff, _) = ExtGcd(c, p);
-    
-        // Обратный элемент существует только если gcd(c, p) = 1
+        
         if (gcd != 1)
             throw new ArgumentException($"Inverse doesn't exist: gcd({c}, {p}) = {gcd}, expected 1");
-    
-        // Приводим коэффициент к положительному виду по модулю p
+        
         long inverse = aCoeff % p;
         if (inverse < 0)
             inverse += p;

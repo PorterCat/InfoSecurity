@@ -39,14 +39,10 @@ public static class Extensions
         }
 
         if (r > 1)
-        {
             throw new Exception("a is not invertible");
-        }
 
         if (t < 0)
-        {
             t += mod;
-        }
 
         return t;
     }

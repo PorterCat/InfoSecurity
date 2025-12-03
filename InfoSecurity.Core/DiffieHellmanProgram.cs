@@ -37,8 +37,8 @@ public static class DiffieHellmanProgram
         }
         else
         {
-            _p = 23;
-            //_p = FermatPrimeGenerator.GeneratePrime(1_000_000_000, 2_000_000_000);
+            //_p = 23;
+            _p = FermatPrimeGenerator.GeneratePrime(1_000_000_000, 2_000_000_000);
             //_p = Prime.Numbers.StartingAt(3_123_123_123_123).First();
             //_p = Prime.Numbers.StartingAt(40_000_000_000_000).First();
             _g = MyAlgorithms.FindPrimitiveRoot(_p);   
@@ -96,5 +96,5 @@ public readonly struct DiffieHellmanUser
     }   
     
     public long ComputeSharedSecret(long otherPublicKey) =>
-        MyAlgorithms.ModPow(otherPublicKey, (long?)_privateKey, _p);
+        MyAlgorithms.ModPow(otherPublicKey, _privateKey, _p);
 }
